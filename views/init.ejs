@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Gamedev Phaser Workshop</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+    <script src="/js/phaser.min.js"></script>
+  </head>
+  <body>
+    <h1>시작</h1>
+    <div>
+      <h2>
+        기존 MDN에서 제공하는 tutorial은 phaser2를 기반으로 하였기 때문에 3
+        버전에는 맞지 않는다. 챕터2로 넘어가세요.
+      </h2>
+    </div>
+    <%- include('./layout/link') %>
+
+    <script>
+      /**
+       * Phaser.game(1, 2, 3, 4, 5)
+       * 1. width
+       * 2. height
+       * 3. AUTO, CANVAS, WEBGL
+       * 4. id of mapping element
+       * 5. 1) preload: takes care of preloading the assets. (사전 로드 처리)
+       * 5. 2) create: is executed once when everything is loaded and ready. (로드 후 준비되면 한 번 실행)
+       * 5. 3) update: is executed on every frame. (모든 프레임에서 실행)
+       */
+      var game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
+        preload: preload,
+        create: create,
+        update: update,
+      });
+      function preload() {}
+      function create() {}
+      function update() {}
+    </script>
+  </body>
+</html>

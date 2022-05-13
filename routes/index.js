@@ -6,24 +6,20 @@ const router = express.Router();
 
 // const Index_model = require("../models/Index_model");
 
-// main
-router.get("/", async (req, res) => {
-  let data = [];
-  data["message"] = "hello Rs-Team!!!";
-  data["ifs"] = true;
-  data["fors"] = [
-    { label: 1 },
-    { label: 2 },
-    { label: 3 },
-    { label: 4 },
-    { label: 5 },
-    { label: 6 },
-  ];
+router.get("/init", async (req, res) => {
+  res.render("init");
+});
 
-  // const testResult = await Index_model.getUserList();
-  // console.log("testResult => ", testResult);
+router.get("/start", async (req, res) => {
+  res.render("start");
+});
 
-  res.render("index", data);
+router.get("/practiceDocs", async (req, res) => {
+  res.render("practiceDocs");
+});
+
+router.get("/practiceGameOne", async (req, res) => {
+  res.render("practiceGameOne");
 });
 
 module.exports = router;

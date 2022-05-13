@@ -3,6 +3,6 @@ const router = express.Router();
 
 const HomeRouter = require("./index");
 
-router.use("/Index", HomeRouter);
+router.use("/Phaser", HomeRouter);
 
 module.exports = router;

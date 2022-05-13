@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script> -->
+    <!-- <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script> -->
+    <!-- <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.51.0/dist/phaser.js"></script> -->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.51.0/dist/phaser.min.js"></script>
+    <!-- <script src="https://labs.phaser.io/assets/pipelines/HueRotatePostFX.js"></script> -->
+  </head>
+  <body>
+    <div>
+      <h1><a href="https://phaser.io/download/stable">다운로드 link</a></h1>
+      <h1><a href="https://newdocs.phaser.io/docs/3.55.2">docs</a></h1>
+      <h1>
+        <a href=" https://photonstorm.github.io/phaser3-docs/index.html"
+          >api docs</a
+        >
+      </h1>
+      <h1>
+        <a
+          href="https://phaser.io/tutorials/making-your-first-phaser-3-game/part1"
+          >튜토리얼 링크</a
+        >
+      </h1>
+      <br />
+    </div>
+    <%- include('./layout/link') %>
+    <script>
+      /**
+       * 1. type: AUTO(follow browser), CANVAS, WEBGL (게임을 렌더링할 ctx를 선택)
+       * 2. scene: 게임내 물체들이 존재하며 서로 상호작용하는 공간. (지형, 아이템, 플레이어 카메라 등 구성)
+       * 2. 1) preload: scene이 호출되기 전
+       * 2. 2) create: scene이 생성될 때 (호출 순서대로 배치)
+       * 2. 3) update: 갱신될 때
+       */
+      // var config = {
+      //   type: Phaser.WEBGL,
+      //   parent: "phaser-example",
+      //   width: 800,
+      //   height: 600,
+      //   physics: {
+      //     default: "arcade",
+      //     arcade: {
+      //       gravity: { y: 300 },
+      //       debug: false,
+      //     },
+      //   },
+      //   // scene: [Example],
+      //   // pipeline: { HueRotatePostFX },
+      // };
+      var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        /* physics 옵션 추가 */
+        physics: {
+          default: "arcade",
+          arcade: {
+            gravity: { y: 300 },
+          },
+        },
+        scene: {
+          preload: preload,
+          create: create,
+          update: update,
+        },
+      };
+
+      var game = new Phaser.Game(config);
+      var platforms;
+      var player;
+      var cursors;
+      var stars;
+      var score = 0;
+      var scoreText;
+      var bombs;
+
+      function preload() {
+        this.load.setBaseURL("http://labs.phaser.io");
+        // https://labs.phaser.io/assets/
+
+        this.load.image("sky", "src/games/firstgame/assets/sky.png");
+        this.load.image("ground", "src/games/firstgame/assets/platform.png");
+        this.load.image("star", "src/games/firstgame/assets/star.png");
+        this.load.image("bomb", "src/games/firstgame/assets/bomb.png");
+        this.load.spritesheet("dude", "src/games/firstgame/assets/dude.png", {
+          frameWidth: 32,
+          frameHeight: 48,
+        });
+      }
+
+      function create() {
+        this.add.image(400, 300, "sky");
+
+        // 지형생성 START
+        platforms = this.physics.add.staticGroup();
+
+        platforms.create(400, 568, "ground").setScale(2).refreshBody();
+
+        platforms.create(600, 400, "ground");
+        platforms.create(50, 250, "ground");
+        platforms.create(750, 220, "ground");
+        // 지형생성 END
+
+        // 플레이어생성 START
+        player = this.physics.add.sprite(100, 450, "dude");
+
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+        // 플레이어생성 END
+
+        // 플레이어 애니메이션 START
+        this.anims.create({
+          key: "left",
+          frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
+          frameRate: 10,
+          repeat: -1,
+        });
+
+        this.anims.create({
+          key: "turn",
+          frames: [{ key: "dude", frame: 4 }],
+          frameRate: 20,
+        });
+
+        this.anims.create({
+          key: "right",
+          frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
+          frameRate: 10,
+          repeat: -1,
+        });
+        // 플레이어 애니메이션 END
+
+        this.physics.add.collider(player, platforms); // 플랫폼에 대한 충돌 확인
+
+        // 플레이어 키 입력에 대한 init
+        cursors = this.input.keyboard.createCursorKeys();
+
+        // 별 생성
+        stars = this.physics.add.group({
+          key: "star",
+          repeat: 11,
+          setXY: { x: 12, y: 0, stepX: 70 },
+        });
+        stars.children.iterate(function (child) {
+          child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        });
+
+        // 스코어 생성
+        scoreText = this.add.text(16, 16, "score: 0", {
+          fontSize: "32px",
+          fill: "#000",
+        });
+
+        // 폭탄 생성
+        bombs = this.physics.add.group({
+          key: "bomb",
+          repeat: 0,
+          setXY: { x: 50, y: -50, stepX: 140 },
+        });
+        bombs.children.iterate(function (child) {
+          child.setBounceY(Phaser.Math.FloatBetween(0.8, 0.8));
+        });
+      }
+
+      function update() {
+        // 플레이어 키 이벤트 START
+        if (cursors.left.isDown) {
+          player.setVelocityX(-160);
+          player.anims.play("left", true);
+        } else if (cursors.right.isDown) {
+          player.setVelocityX(160);
+          player.anims.play("right", true);
+        } else {
+          player.setVelocityX(0);
+          player.anims.play("turn");
+        }
+
+        if (cursors.up.isDown && player.body.touching.down) {
+          player.setVelocityY(-500);
+        }
+        // 플레이어 키 이벤트 END
+
+        // 별
+        this.physics.add.collider(stars, platforms); // 플랫폼에 대한 충돌 확인
+        this.physics.add.overlap(player, stars, collectStar, null, this); // 플레이어가 별과 겹치는지 확인, 겹치면 collectStar함수로 전달
+
+        // 폭탄
+        this.physics.add.collider(bombs, platforms); // 플랫폼에 대한 충돌 확인
+        this.physics.add.collider(player, bombs, hitBomb, null, this); // 플레이어가 별과 겹치는지 확인, 겹치면 hitBomb함수로 전달
+      }
+
+      // 별 수집
+      function collectStar(player, star) {
+        star.disableBody(true, true); // 별을 비활성화
+
+        // 점수 추가
+        score += 10;
+        scoreText.setText("Score: " + score);
+
+        // 별을 전부 clear하면 움직이는 폭탄 생성
+        if (stars.countActive(true) === 0) {
+          stars.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true);
+          });
+
+          var x =
+            player.x < 400
+              ? Phaser.Math.Between(400, 800)
+              : Phaser.Math.Between(0, 400);
+
+          var bomb = bombs.create(x, 16, "bomb");
+          bomb.setBounce(1);
+          bomb.setCollideWorldBounds(true);
+          bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        }
+      }
+
+      // 폭탄 히트
+      function hitBomb(player, bomb) {
+        this.physics.pause();
+
+        player.setTint(0xff0000);
+
+        player.anims.play("turn");
+
+        // gameOver = true;
+        alert("Game Over!");
+        this.scene.restart();
+      }
+    </script>
+  </body>
+</html>
